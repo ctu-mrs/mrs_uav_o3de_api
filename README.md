@@ -28,7 +28,9 @@ O3DE exchanges data with ROS once per rendered frame, including `/clock`. In rea
 
 The tmux session therefore runs the simulator with `--t_simulationTickDeltaOverride=17000`, in microseconds. Every frame then advances sim time by exactly 17 ms, so sim time depends on the frame rate instead of the wall clock: a slow frame only slows the simulation down. All nodes must use sim time, so keep `USE_SIM_TIME=true`.
 
-The realtime factor is 0.017 s times the frame rate, about 0.5 at 30 FPS. A smaller step gives higher control and camera rates in sim time, at a lower realtime factor. The camera rate in sim time is limited by the step, 59 Hz at 17 ms.
+The realtime factor is 0.017 s times the frame rate. A smaller step gives higher control and camera rates in sim time, at a lower realtime factor. The camera rate in sim time is limited by the step, 59 Hz at 17 ms.
+
+`--r_renderScale=0.35` lowers the resolution of the game view, which is most of the rendering cost. It does not affect the ROS camera. On an integrated GPU, it raised the frame rate from about 30 to about 45 FPS with the MRS UAV System running, for a realtime factor of about 0.75. Don't combine it with the low-end render pipeline: the game failed to run with both.
 
 ## Build
 
