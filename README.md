@@ -30,7 +30,7 @@ The tmux session therefore runs the simulator with `--t_simulationTickDeltaOverr
 
 The realtime factor is 0.017 s times the frame rate. A smaller step gives higher control and camera rates in sim time, at a lower realtime factor. The camera rate in sim time is limited by the step, 59 Hz at 17 ms.
 
-On a weak GPU, `--r_renderScale=0.35` trades game view resolution for speed, without affecting the ROS camera. On an integrated GPU, it raised the frame rate from 20 to 30 FPS to about 45 FPS, for a realtime factor of about 0.75 instead of 0.35 to 0.5.
+The session uses `--r_renderScale=0.5`, which trades game view resolution for speed without affecting the ROS camera. On a weak GPU, lower values help further: at 0.35, on an integrated GPU, it raised the frame rate from 20 to 30 FPS to about 45 FPS, for a realtime factor of about 0.75 instead of 0.35 to 0.5.
 
 `--r_multiSampleCount=1` turns MSAA off. It applies to the whole application, so the ROS camera too, and it changed the frame rate by less than the measurement noise.
 
@@ -56,3 +56,5 @@ source ~/ws_o3de/install/setup.zsh
 cd ~/ws_o3de/src/mrs_uav_o3de_api/tmux/one_drone
 ./start.sh
 ```
+
+`./start_headless.sh` runs the same session with `--rhi=null` and without the graphical windows. Nothing renders, so there is no game view and no camera, but physics and the lidar keep running. It reaches about 75 FPS with the MRS UAV System running on an integrated GPU, a realtime factor of about 1.3, so it runs faster than real time.
