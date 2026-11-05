@@ -22,15 +22,13 @@ The simulator cuts the throttle 0.5 s after the last command, so the plugin disa
 - `config/mrs_uav_system/x500.yaml` must match the simulator: `motor_params/a` is `1 / sqrt(k_f * omega_max^2)` and `b` is 0.
 - `rangefinder/ground_z` is the negative of the spawn height, because the odometry starts at the spawn point.
 
-## Low frame rates
+## Fixed simulation step
 
-O3DE exchanges data with ROS once per rendered frame, including `/clock`, while physics keeps real time. With rendering on the integrated GPU, that is about 25 Hz. The configuration accounts for it:
+O3DE exchanges data with ROS once per rendered frame, including `/clock`. In real time, each frame covers a varying amount of sim time, and at low frame rates a slow frame looks like a data dropout to the MRS UAV System.
 
-- `input_mode` uses attitude only. The attitude loop then runs inside O3DE at 500 Hz. Attitude rate mode crashed during a goto at 25 Hz, though it flew fine at about 900 Hz with `--rhi=null`.
-- `tmux/one_drone/config/custom_config.yaml` raises `odometry_max_missing_time` to 0.5 s, because one slow frame can exceed the default 0.1 s.
-- The session waits 30 s before takeoff. The frame rate can dip to about 3 Hz in the first 30 s, which triggered a failsafe landing with the default timeout.
+The tmux session therefore runs the simulator with `--t_simulationTickDeltaOverride=17000`, in microseconds. Every frame then advances sim time by exactly 17 ms, so sim time depends on the frame rate instead of the wall clock: a slow frame only slows the simulation down. All nodes must use sim time, so keep `USE_SIM_TIME=true`.
 
-The frame rate also dips during flight, and a dip can cost a few tens of centimeters of height.
+The realtime factor is 0.017 s times the frame rate, about 0.5 at 30 FPS. A smaller step gives higher control and camera rates in sim time, at a lower realtime factor. The camera rate in sim time is limited by the step, 59 Hz at 17 ms.
 
 ## Build
 

@@ -17,10 +17,8 @@ plugin:
     z_offset: -0.05 # [m] the sensor below the FCU frame
     max_range: 40.0 # [m]
 
-  # Attitude mode closes the attitude loop inside O3DE at the physics rate. Commands only reach the
-  # simulator once per rendered frame, so attitude rate mode is unstable at low frame rates.
   input_mode:
-    attitude_rate: false
+    attitude_rate: true
     attitude:      true
 
   outputs:

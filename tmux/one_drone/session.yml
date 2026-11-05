@@ -19,7 +19,7 @@ windows:
   - simulator:
       layout: tiled
       panes:
-        - cd ${O3DE_PROJECT:-~/git/o3de_drone_sim}/build/linux/bin/profile && ./DroneSim.GameLauncher --project-path=${O3DE_PROJECT:-~/git/o3de_drone_sim} --bg_ConnectToAssetProcessor=0 --loadlevel=levels/demolevel/demolevel.spawnable
+        - cd ${O3DE_PROJECT:-~/git/o3de_drone_sim}/build/linux/bin/profile && ./DroneSim.GameLauncher --project-path=${O3DE_PROJECT:-~/git/o3de_drone_sim} --bg_ConnectToAssetProcessor=0 --t_simulationTickDeltaOverride=17000 --loadlevel=levels/demolevel/demolevel.spawnable
   - hw_api:
       layout: tiled
       panes:
@@ -40,7 +40,7 @@ windows:
       layout: tiled
       panes:
         - ros2 launch mrs_uav_autostart automatic_start.launch.py custom_config:=./config/automatic_start.yaml
-        - waitForCore && sleep 30 && ./takeoff.sh
+        - waitForCore && ./takeoff.sh
   - commands:
       layout: tiled
       panes:
