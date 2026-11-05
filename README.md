@@ -30,7 +30,7 @@ The tmux session therefore runs the simulator with `--t_simulationTickDeltaOverr
 
 The realtime factor is 0.017 s times the frame rate. A smaller step gives higher control and camera rates in sim time, at a lower realtime factor. The camera rate in sim time is limited by the step, 59 Hz at 17 ms.
 
-`--r_renderScale=0.35` lowers the resolution of the game view, which is most of the rendering cost. It does not affect the ROS camera. On an integrated GPU, it raised the frame rate from about 30 to about 45 FPS with the MRS UAV System running, for a realtime factor of about 0.75. Don't combine it with the low-end render pipeline: the game failed to run with both.
+On a weak GPU, `--r_renderScale=0.35` trades game view resolution for speed, without affecting the ROS camera. On an integrated GPU, it raised the frame rate from 20 to 30 FPS to about 45 FPS, for a realtime factor of about 0.75 instead of 0.35 to 0.5. Don't combine it with the low-end render pipeline: the game failed to run with both.
 
 ## Build
 
