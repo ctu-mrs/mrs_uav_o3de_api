@@ -11,12 +11,6 @@ plugin:
   # determines if offboard can be switched on
   input_timeout: 1.0 # [s]
 
-  # O3DE has no rangefinder yet, the range is computed from the odometry over a flat floor
-  rangefinder:
-    ground_z: -0.155 # [m] the floor in the odometry frame, which starts at the spawn point
-    z_offset: -0.05 # [m] the sensor below the FCU frame
-    max_range: 40.0 # [m]
-
   input_mode:
     attitude_rate: true
     attitude:      true

@@ -14,7 +14,6 @@ set(DEPENDENCIES
   geometry_msgs
   nav_msgs
   sensor_msgs
-  tf2_ros
   mrs_lib
   mrs_msgs
   mrs_uav_hw_api

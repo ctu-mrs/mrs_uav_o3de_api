@@ -5,13 +5,10 @@
 #include <mrs_uav_hw_api/api.h>
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
-#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/range.hpp>
-
-#include <tf2_ros/static_transform_broadcaster.h>
 
 #include <mrs_lib/attitude_converter.h>
 #include <mrs_lib/gps_conversions.h>
@@ -89,30 +86,25 @@ private:
   std::string _utm_zone_;
   double      _amsl_;
 
-  double _rangefinder_ground_z_;
-  double _rangefinder_z_offset_;
-  double _rangefinder_max_range_;
-
   double _input_timeout_;
 
   std::string _world_frame_;
   std::string _body_frame_;
-  std::string _rangefinder_frame_;
 
   // | ----------------------- subscribers ---------------------- |
 
   mrs_lib::SubscriberHandler<nav_msgs::msg::Odometry> sh_odom_;
   mrs_lib::SubscriberHandler<sensor_msgs::msg::Imu>   sh_imu_;
+  mrs_lib::SubscriberHandler<sensor_msgs::msg::Range> sh_range_;
 
   void callbackOdom(const nav_msgs::msg::Odometry::ConstSharedPtr msg);
   void callbackImu(const sensor_msgs::msg::Imu::ConstSharedPtr msg);
+  void callbackRangefinder(const sensor_msgs::msg::Range::ConstSharedPtr msg);
 
   // | ----------------------- publishers ----------------------- |
 
   mrs_lib::PublisherHandler<geometry_msgs::msg::TwistStamped> ph_attitude_rate_cmd_;
   mrs_lib::PublisherHandler<geometry_msgs::msg::PoseStamped>  ph_attitude_cmd_;
-
-  std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_tf_broadcaster_;
 
   // | ------------------------- timers ------------------------- |
 
@@ -130,8 +122,6 @@ private:
   // | ------------------------- methods ------------------------ |
 
   bool updateCmdTime(void);
-  void publishRangefinderTf(void);
-  void publishRangefinder(const nav_msgs::msg::Odometry &odom);
   void publishPositionData(const nav_msgs::msg::Odometry &odom);
   void publishBatteryState(void);
   void publishRC(void);
@@ -158,7 +148,6 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
 
   _world_frame_       = uav_name + "/" + common_handlers_->getWorldFrameName();
   _body_frame_        = uav_name + "/" + common_handlers_->getBodyFrameName();
-  _rangefinder_frame_ = uav_name + "/garmin";
 
   last_cmd_time_ = rclcpp::Time(0, 0, clock_->get_clock_type());
 
@@ -195,10 +184,6 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
   local_param_loader.loadParam("gnss/utm_y", _utm_y_);
   local_param_loader.loadParam("gnss/utm_zone", _utm_zone_);
   local_param_loader.loadParam("gnss/amsl", _amsl_);
-
-  local_param_loader.loadParam("rangefinder/ground_z", _rangefinder_ground_z_);
-  local_param_loader.loadParam("rangefinder/z_offset", _rangefinder_z_offset_);
-  local_param_loader.loadParam("rangefinder/max_range", _rangefinder_max_range_);
 
   local_param_loader.loadParam("input_mode/attitude_rate", (bool &)_capabilities_.accepts_attitude_rate_cmd);
   local_param_loader.loadParam("input_mode/attitude", (bool &)_capabilities_.accepts_attitude_cmd);
@@ -238,6 +223,8 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
   sh_odom_ = mrs_lib::SubscriberHandler<nav_msgs::msg::Odometry>(shopts, "~/simulator_odom_in", &Api::callbackOdom, this);
   sh_imu_  = mrs_lib::SubscriberHandler<sensor_msgs::msg::Imu>(shopts, "~/simulator_imu_in", &Api::callbackImu, this);
 
+  sh_range_ = mrs_lib::SubscriberHandler<sensor_msgs::msg::Range>(shopts, "~/simulator_rangefinder_in", &Api::callbackRangefinder, this);
+
   // | ----------------------- publishers ----------------------- |
 
   if (_capabilities_.accepts_attitude_rate_cmd) {
@@ -246,11 +233,6 @@ void Api::initialize(const rclcpp::Node::SharedPtr &node, std::shared_ptr<mrs_ua
 
   if (_capabilities_.accepts_attitude_cmd) {
     ph_attitude_cmd_ = mrs_lib::PublisherHandler<geometry_msgs::msg::PoseStamped>(node_, "~/simulator_attitude_cmd_out");
-  }
-
-  if (_capabilities_.produces_distance_sensor) {
-    static_tf_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(node_);
-    publishRangefinderTf();
   }
 
   // | ------------------------- timers ------------------------- |
@@ -534,10 +516,6 @@ void Api::callbackOdom(const nav_msgs::msg::Odometry::ConstSharedPtr msg) {
 
   publishPositionData(odom);
 
-  if (_capabilities_.produces_distance_sensor) {
-    publishRangefinder(odom);
-  }
-
   if (_capabilities_.produces_magnetometer_heading) {
 
     mrs_msgs::msg::Float64Stamped heading;
@@ -577,6 +555,21 @@ void Api::callbackImu(const sensor_msgs::msg::Imu::ConstSharedPtr msg) {
 
 //}
 
+/* callbackRangefinder() //{ */
+
+void Api::callbackRangefinder(const sensor_msgs::msg::Range::ConstSharedPtr msg) {
+
+  if (!is_initialized_ || !_capabilities_.produces_distance_sensor) {
+    return;
+  }
+
+  RCLCPP_INFO_ONCE(node_->get_logger(), "getting rangefinder");
+
+  common_handlers_->publishers.publishDistanceSensor(*msg);
+}
+
+//}
+
 // | ------------------------- timers ------------------------- |
 
 /* timerMain() //{ */
@@ -604,54 +597,6 @@ void Api::timerMain() {
 //}
 
 // | ------------------------- methods ------------------------ |
-
-/* publishRangefinderTf() //{ */
-
-void Api::publishRangefinderTf(void) {
-
-  geometry_msgs::msg::TransformStamped tf;
-
-  tf.header.stamp            = clock_->now();
-  tf.header.frame_id         = _body_frame_;
-  tf.child_frame_id          = _rangefinder_frame_;
-  tf.transform.translation.z = _rangefinder_z_offset_;
-  tf.transform.rotation      = mrs_lib::AttitudeConverter(0, M_PI_2, 0);  // the sensor's X points down
-
-  static_tf_broadcaster_->sendTransform(tf);
-}
-
-//}
-
-/* publishRangefinder() //{ */
-
-void Api::publishRangefinder(const nav_msgs::msg::Odometry &odom) {
-
-  const double height = odom.pose.pose.position.z + _rangefinder_z_offset_ - _rangefinder_ground_z_;
-
-  // the Z component of the body's Z axis, i.e., the cosine of the tilt
-  const auto  &q        = odom.pose.pose.orientation;
-  const double cos_tilt = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
-
-  double range = _rangefinder_max_range_ + 1.0;  // beyond max_range means no return
-
-  if (cos_tilt > 0) {
-    range = std::min(height / cos_tilt, range);
-  }
-
-  sensor_msgs::msg::Range msg;
-
-  msg.header.stamp    = odom.header.stamp;
-  msg.header.frame_id = _rangefinder_frame_;
-  msg.radiation_type  = sensor_msgs::msg::Range::INFRARED;
-  msg.field_of_view   = 0.01;
-  msg.min_range       = 0.0;
-  msg.max_range       = _rangefinder_max_range_;
-  msg.range           = std::max(range, 0.0);
-
-  common_handlers_->publishers.publishDistanceSensor(msg);
-}
-
-//}
 
 /* publishPositionData() //{ */
 

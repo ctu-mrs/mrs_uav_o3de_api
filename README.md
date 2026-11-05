@@ -11,16 +11,14 @@ The simulator uses standard messages only; the plugin translates the MRS HW API 
 | attitude rate | `/$UAV_NAME/cmd/attitude_rate` | `geometry_msgs/TwistStamped` | `twist.angular` = body rate, `twist.linear.z` = throttle |
 | attitude | `/$UAV_NAME/cmd/attitude` | `geometry_msgs/PoseStamped` | `pose.orientation` = attitude, `pose.position.z` = throttle |
 
-Inputs: `/$UAV_NAME/odom` (`nav_msgs/Odometry`, twist in the body frame) and `/$UAV_NAME/imu` (`sensor_msgs/Imu`).
+Inputs: `/$UAV_NAME/odom` (`nav_msgs/Odometry`, twist in the body frame), `/$UAV_NAME/imu` (`sensor_msgs/Imu`), and `/$UAV_NAME/rangefinder` (`sensor_msgs/Range`).
 Everything else (GNSS, altitude, heading, ...) is derived from the odometry.
 
 The simulator cuts the throttle 0.5 s after the last command, so the plugin disarms by not forwarding commands.
 
 ## Limitations
 
-- O3DE has no rangefinder yet. `distance_sensor` is computed from the odometry over a flat floor at `rangefinder/ground_z` (`config/hw_api.yaml`), so it ignores obstacles under the UAV. A real sensor could replace it by publishing `sensor_msgs/Range`.
 - `config/mrs_uav_system/x500.yaml` must match the simulator: `motor_params/a` is `1 / sqrt(k_f * omega_max^2)` and `b` is 0.
-- `rangefinder/ground_z` is the negative of the spawn height, because the odometry starts at the spawn point.
 
 ## Fixed simulation step
 

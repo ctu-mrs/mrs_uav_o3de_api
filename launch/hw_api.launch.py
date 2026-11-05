@@ -110,6 +110,7 @@ def generate_launch_description():
                 remappings=[
                   ("~/simulator_imu_in", ["/", uav_name, "/imu"]),
                   ("~/simulator_odom_in", ["/", uav_name, "/odom"]),
+                  ("~/simulator_rangefinder_in", ["/", uav_name, "/rangefinder"]),
                   ("~/simulator_attitude_rate_cmd_out", ["/", uav_name, "/cmd/attitude_rate"]),
                   ("~/simulator_attitude_cmd_out", ["/", uav_name, "/cmd/attitude"]),
                   ("~/errors", "errors"),
