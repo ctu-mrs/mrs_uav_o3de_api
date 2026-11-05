@@ -19,7 +19,7 @@ windows:
   - simulator:
       layout: tiled
       panes:
-        - cd ${O3DE_PROJECT:-~/git/o3de_drone_sim}/build/linux/bin/profile && ./DroneSim.GameLauncher --project-path=${O3DE_PROJECT:-~/git/o3de_drone_sim} --bg_ConnectToAssetProcessor=0 --t_simulationTickDeltaOverride=17000 --rhi=null --loadlevel=levels/demolevel/demolevel.spawnable
+        - cd ${O3DE_PROJECT:-~/git/o3de_drone_sim}/build/linux/bin/profile && ./DroneSim.GameLauncher --project-path=${O3DE_PROJECT:-~/git/o3de_drone_sim} --bg_ConnectToAssetProcessor=0 --t_simulationTickDeltaOverride=17000 --rhi=null --loadlevel=levels/${O3DE_LEVEL:-demolevel}/${O3DE_LEVEL:-demolevel}.spawnable
   - hw_api:
       layout: tiled
       panes:

@@ -57,4 +57,6 @@ cd ~/ws_o3de/src/mrs_uav_o3de_api/tmux/one_drone
 ./start.sh
 ```
 
+The session loads `DemoLevel`, the warehouse. Set `O3DE_LEVEL` to load another level, for example `export O3DE_LEVEL=kladnosplat`, using the lowercase name.
+
 `./start_headless.sh` runs the same session with `--rhi=null` and without the graphical windows. Nothing renders, so there is no game view and no camera, but physics and the lidar keep running. It reaches about 75 FPS with the MRS UAV System running on an integrated GPU, a realtime factor of about 1.3, so it runs faster than real time.
