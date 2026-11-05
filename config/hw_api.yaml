@@ -1,0 +1,40 @@
+hw_interface_plugin: "mrs_uav_o3de_api::Api"
+
+plugin:
+
+  gnss:
+    utm_zone: "32T"
+    utm_x: 465710.758973
+    utm_y: 5249465.43086
+    amsl: 340.0
+
+  # determines if offboard can be switched on
+  input_timeout: 1.0 # [s]
+
+  # O3DE has no rangefinder yet, the range is computed from the odometry over a flat floor
+  rangefinder:
+    ground_z: -0.155 # [m] the floor in the odometry frame, which starts at the spawn point
+    z_offset: -0.05 # [m] the sensor below the FCU frame
+    max_range: 40.0 # [m]
+
+  # Attitude mode closes the attitude loop inside O3DE at the physics rate. Commands only reach the
+  # simulator once per rendered frame, so attitude rate mode is unstable at low frame rates.
+  input_mode:
+    attitude_rate: false
+    attitude:      true
+
+  outputs:
+    distance_sensor:      true
+    gnss:                 true
+    rtk:                  true
+    imu:                  true
+    altitude:             true
+    magnetometer_heading: true
+    rc_channels:          true
+    battery_state:        true
+    position:             true
+    orientation:          true
+    velocity:             true
+    angular_velocity:     true
+    odometry:             true
+    ground_truth:         true

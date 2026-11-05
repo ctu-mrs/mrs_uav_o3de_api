@@ -1,0 +1,5 @@
+<library path="MrsUavO3deApi_Plugin">
+  <class type="mrs_uav_o3de_api::Api" base_class_type="mrs_uav_hw_api::MrsUavHwApi">
+    <description>HW API for the O3DE multirotor simulator</description>
+  </class>
+</library>
