@@ -11,13 +11,17 @@ The simulator uses standard messages only; the plugin translates the MRS HW API 
 | attitude rate | `/$UAV_NAME/cmd/attitude_rate` | `geometry_msgs/TwistStamped` | `twist.angular` = body rate, `twist.linear.z` = throttle |
 | attitude | `/$UAV_NAME/cmd/attitude` | `geometry_msgs/PoseStamped` | `pose.orientation` = attitude, `pose.position.z` = throttle |
 
-Inputs: `/$UAV_NAME/odom` (`nav_msgs/Odometry`, twist in the body frame), `/$UAV_NAME/imu` (`sensor_msgs/Imu`), and `/$UAV_NAME/rangefinder` (`sensor_msgs/Range`).
+Inputs: `/$UAV_NAME/odom` (`nav_msgs/Odometry`, twist in the body frame), `/$UAV_NAME/imu` (`sensor_msgs/Imu`), `/$UAV_NAME/rangefinder` (`sensor_msgs/Range`), and `/$UAV_NAME/on_ground` (`std_msgs/Bool`), which sets `airborne` in the status.
 Everything else (GNSS, altitude, heading, ...) is derived from the odometry.
+
+`config/hw_api.yaml` selects the inputs and outputs under `mrs_uav_hw_api/inputs` and `mrs_uav_hw_api/outputs`. The HW API manager stops if the config requests an input other than `attitude_rate` and `attitude`, because the plugin does not report it as provided.
 
 The simulator cuts the throttle 0.5 s after the last command, so the plugin disarms by not forwarding commands.
 
 ## Limitations
 
+- `airborne` is `AIRBORNE_UNKNOWN` until the simulator releases the UAV, because it does not publish `on_ground` while it waits for the ground to appear.
+- GNSS status, magnetic field, battery, and RC are fixed placeholder values. The magnetic field does not rotate with the UAV.
 - `config/mrs_uav_system/x500.yaml` must match the simulator: `motor_params/a` is `1 / sqrt(k_f * omega_max^2)` and `b` is 0.
 
 ## Fixed simulation step

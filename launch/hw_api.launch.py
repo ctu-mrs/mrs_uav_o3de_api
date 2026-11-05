@@ -36,7 +36,7 @@ def generate_launch_description():
         description="The uav name used for namespacing.",
     ))
 
-    # #} end of custom_config
+    # #} end of uav_name
 
     # #{ custom_config
 
@@ -63,6 +63,28 @@ def generate_launch_description():
 
     # #} end of custom_config
 
+    # #{ platform_config
+
+    platform_config = LaunchConfiguration('platform_config')
+
+    ld.add_action(DeclareLaunchArgument(
+        'platform_config',
+        default_value="",
+        description="Path to the platform configuration file. The path can be absolute, starting with '/' or relative to the current working directory",
+    ))
+
+    # behaviour:
+    #     platform_config == "" => platform_config: ""
+    #     platform_config == "/<path>" => platform_config: "/<path>"
+    #     platform_config == "<path>" => platform_config: "$(pwd)/<path>"
+    platform_config = IfElseSubstitution(
+            condition=PythonExpression(['"', platform_config, '" != "" and ', 'not "', platform_config, '".startswith("/")']),
+            if_value=PathJoinSubstitution([EnvironmentVariable('PWD'), platform_config]),
+            else_value=platform_config
+    )
+
+    # #} end of platform_config
+
     # #{ use_sim_time
 
     use_sim_time = LaunchConfiguration('use_sim_time')
@@ -73,7 +95,7 @@ def generate_launch_description():
         description="Should the node subscribe to sim time?",
     ))
 
-    # #} end of custom_config
+    # #} end of use_sim_time
 
     # the first one has the priority
     configs = [
@@ -105,12 +127,14 @@ def generate_launch_description():
                     {"use_sim_time": use_sim_time},
                     {"configs": configs},
                     {'custom_config': custom_config},
+                    {'platform_config': platform_config},
                 ],
 
                 remappings=[
                   ("~/simulator_imu_in", ["/", uav_name, "/imu"]),
                   ("~/simulator_odom_in", ["/", uav_name, "/odom"]),
                   ("~/simulator_rangefinder_in", ["/", uav_name, "/rangefinder"]),
+                  ("~/simulator_on_ground_in", ["/", uav_name, "/on_ground"]),
                   ("~/simulator_attitude_rate_cmd_out", ["/", uav_name, "/cmd/attitude_rate"]),
                   ("~/simulator_attitude_cmd_out", ["/", uav_name, "/cmd/attitude"]),
                   ("~/errors", "errors"),
