@@ -14,7 +14,7 @@ class Goto(Node):
 
         self.get_logger().info('Setting up the client')
 
-        self.client = self.create_client(Vec4, "/uav1/control_manager/goto")
+        self.client = self.create_client(Vec4, "/uav1/control_manager/goto_fcu")
 
         self.timer = self.create_timer(0.1, self.doAction)
 
@@ -30,10 +30,10 @@ class Goto(Node):
             self.get_logger().info('service not available, waiting again...')
 
         request = Vec4.Request()
-        request.goal[0] = 5.0
-        request.goal[1] = 5.0
-        request.goal[2] = 2.0
-        request.goal[3] = 1.5
+        request.goal[0] = 100.0
+        request.goal[1] = 0.0
+        request.goal[2] = 0.0
+        request.goal[3] = 0.0
 
         self.get_logger().info('Calling service')
 
