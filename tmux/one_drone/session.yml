@@ -12,7 +12,7 @@ pre_window: export UAV_NAME=uav1;
             export USE_SIM_TIME="true";
             export RMW_IMPLEMENTATION=rmw_zenoh_cpp;
             export O3DE_PROJECT=${O3DE_PROJECT:-~/git/o3de_drone_sim};
-            export O3DE_LEVEL=${O3DE_LEVEL:-demolevel};
+            export O3DE_LEVEL=${O3DE_LEVEL:-demolevel}
 windows:
   - router:
       layout: tiled
