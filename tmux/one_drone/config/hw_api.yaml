@@ -1,0 +1,9 @@
+mrs_uav_hw_api:
+
+  plugin:
+
+    gnss:
+      utm_zone: "33N"
+      utm_x: 375110.195
+      utm_y: 5832245.733
+      amsl: 65.0

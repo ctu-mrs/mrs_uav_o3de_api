@@ -11,6 +11,7 @@ pre_window: export UAV_NAME=uav1;
             export PLATFORM_CONFIG=`ros2 pkg prefix mrs_uav_o3de_api`/share/mrs_uav_o3de_api/config/mrs_uav_system/$UAV_TYPE.yaml;
             export USE_SIM_TIME="true";
             export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+            export O3DE_LEVEL=berlin
 windows:
   - router:
       layout: tiled
@@ -23,7 +24,7 @@ windows:
   - hw_api:
       layout: tiled
       panes:
-        - ros2 launch mrs_uav_o3de_api hw_api.launch.py
+        - ros2 launch mrs_uav_o3de_api hw_api.launch.py custom_config:=./config/hw_api.yaml
   - core:
       layout: tiled
       panes:
@@ -45,6 +46,10 @@ windows:
       layout: tiled
       panes:
         - ros2 run rviz2 rviz2 -d ./rviz.rviz --ros-args -p use_sim_time:=true
+  - foxglove_bridge:
+      layout: tiled
+      panes:
+        - ros2 launch foxglove_bridge foxglove_bridge_launch.xml
   - layout:
       layout: tiled
       panes:
