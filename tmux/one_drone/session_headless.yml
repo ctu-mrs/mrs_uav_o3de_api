@@ -11,6 +11,7 @@ pre_window: export UAV_NAME=uav1;
             export PLATFORM_CONFIG=`ros2 pkg prefix mrs_uav_o3de_api`/share/mrs_uav_o3de_api/config/mrs_uav_system/$UAV_TYPE.yaml;
             export USE_SIM_TIME="true";
             export RMW_IMPLEMENTATION=rmw_zenoh_cpp;
+            export O3DE_PROJECT=${O3DE_PROJECT:-~/git/o3de_drone_sim};
             export O3DE_LEVEL=${O3DE_LEVEL:-demolevel};
 windows:
   - router:
@@ -20,7 +21,7 @@ windows:
   - simulator:
       layout: tiled
       panes:
-        - cd ${O3DE_PROJECT:-~/git/o3de_drone_sim}/build/linux/bin/profile && ./DroneSim.GameLauncher --project-path=${O3DE_PROJECT:-~/git/o3de_drone_sim} --bg_ConnectToAssetProcessor=0 --t_simulationTickDeltaOverride=17000 --rhi=null --loadlevel=levels/${O3DE_LEVEL:-demolevel}/${O3DE_LEVEL:-demolevel}.spawnable
+        - cd $O3DE_PROJECT/build/linux/bin/profile && ./DroneSim.GameLauncher --project-path=$O3DE_PROJECT --bg_ConnectToAssetProcessor=0 --t_simulationTickDeltaOverride=17000 --rhi=null --loadlevel=levels/$O3DE_LEVEL/$O3DE_LEVEL.spawnable
   - hw_api:
       layout: tiled
       panes:
