@@ -25,7 +25,7 @@ windows:
   - hw_api:
       layout: tiled
       panes:
-        - ros2 launch mrs_uav_o3de_api hw_api.launch.py custom_config:=./config/hw_api.yaml
+        - ros2 launch mrs_uav_o3de_api hw_api.launch.py custom_config:=./config/hw_api.yaml platform_config:=$PLATFORM_CONFIG
   - core:
       layout: tiled
       panes:
